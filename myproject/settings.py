@@ -72,7 +72,7 @@ WSGI_APPLICATION = 'myproject.wsgi.application'
 
 CASHFREE = {
     'APP_ID': 'TEST100437297bd60a37f4362e19c9f592734001',
-    'SECRET_KEY': 'TESTcb27e93023ea47bba98f38131734a805bc55c3bc',
+    'SECRET_KEY': 'TEST1e74e890df9865459c503d5d8cf1b2a234789b4a',
     'ENV': 'sandbox'  # Use 'sandbox' for testing, 'production' for live payments
 }
 
