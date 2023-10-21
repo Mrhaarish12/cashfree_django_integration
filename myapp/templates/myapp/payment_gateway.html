@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Payment Gateway</title>
+</head>
+<body>
+    <h1>Payment Gateway</h1>
+    <!-- Include the Cashfree JavaScript library -->
+    <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const cashfree = Cashfree({
+                mode: "{{ environment }}",  // Use "sandbox" for testing, "production" for live payments
+            });
+
+            let checkoutOptions = {
+                paymentSessionId: "{{ payment_session_id }}",  // Replace with the generated session ID
+                appId: "{{ app_id }}",  // Use the app_id from the view
+                // returnUrl: "{{ payment_success_url }}",  // Use the URL pattern for payment success
+                returnUrl: "{% url 'payment_success' %}",  // Use the URL pattern for payment success
+            }
+
+            document.getElementById('paymentButton').addEventListener('click', function () {
+                cashfree.checkout(checkoutOptions).then(function (result) {
+                    console.log("Checkout Result:", result);
+                    if (result.error) {
+                        alert(result.error.message);
+                    }
+                    if (result.redirect) {
+                        console.log("Redirection");
+                    }
+                });
+            });
+        });
+    </script>
+    <button id="paymentButton">Proceed to Payment</button>
+</body>
+</html>
