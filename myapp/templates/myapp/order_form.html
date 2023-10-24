@@ -10,5 +10,33 @@
         {{ form.as_p }}
         <button type="submit">Submit</button>
     </form>
+    {% if payment_session_id %}
+    <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const cashfree = Cashfree({
+                mode: "{{ environment }}",  // Use "sandbox" for testing, "production" for live payments
+            });
+
+            let checkoutOptions = {
+                paymentSessionId: "{{ payment_session_id }}",  // Replace with the generated session ID
+                appId: "{{ app_id }}",  // Use the app_id from the view
+                // returnUrl: "{{ payment_success_url }}",  // Use the URL pattern for payment success
+                returnUrl: "{% url 'payment_success' %}",  // Use the URL pattern for payment success
+            }
+
+            cashfree.checkout(checkoutOptions).then(function (result) {
+                console.log("Checkout Result:", result);
+                if (result.error) {
+                    alert(result.error.message);
+                }
+                if (result.redirect) {
+                    console.log("Redirection");
+                }
+            });
+        });
+    </script>
+    {% endif %}
 </body>
 </html>

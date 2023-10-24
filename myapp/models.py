@@ -9,7 +9,7 @@ class Order(models.Model):
         # Add more currency choices as needed
     ]
 
-    order_id = models.CharField(max_length=100, validators=[MinLengthValidator(limit_value=3)])
+    order_id = models.CharField(max_length=25,default=1000)
     currency = models.CharField(max_length=3, choices=CURRENCY_CHOICES, default='INR')
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     customer_id = models.IntegerField(default=100)  # Default value for customer_id
@@ -21,6 +21,16 @@ class Order(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk:  # Only increment when creating a new object
-            latest_order = Order.objects.latest('customer_id')
-            self.customer_id = latest_order.customer_id + 1
+            # Check if any orders exist in the database
+            if Order.objects.exists():
+                latest_order = Order.objects.latest('order_id')
+                latest_customer_order = Order.objects.latest('customer_id')
+
+                self.order_id = str(int(latest_order.order_id) + 1)
+                self.customer_id = latest_customer_order.customer_id + 1
+            else:
+                # If no orders exist, set initial values
+                self.order_id = "1000"
+                self.customer_id = 100
+
         super().save(*args, **kwargs)

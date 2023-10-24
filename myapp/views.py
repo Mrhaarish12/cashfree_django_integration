@@ -1,5 +1,4 @@
 from django.shortcuts import render, redirect
-import uuid
 import requests
 from .models import Order
 from .forms import OrderForm
@@ -35,7 +34,6 @@ def initiate_payment(request):
             order_note = form.cleaned_data['order_note']
 
             # Generate a unique payment session ID
-            payment_session_id = str(uuid.uuid4())  # Convert the UUID to a string
             india_timezone = pytz.timezone("Asia/Kolkata")
             order_expiry_time = timezone.now() + timezone.timedelta(minutes=20)
             print(order_expiry_time)
@@ -58,7 +56,7 @@ def initiate_payment(request):
                     "customer_phone": customer_phone,
                     "customer_name": customer_name
                 },
-                "order_id": order.order_id,
+                "order_id": str(order.order_id),
                 "order_amount": float(order.amount),  # Convert the amount to a float
                 "order_currency": order.currency,
                 "order_expiry_time": formatted_expiry_time,  # Format the expiry time
@@ -71,13 +69,16 @@ def initiate_payment(request):
                 # Extract session ID from the response
                 session_id = response.json().get('payment_session_id')
                 print(session_id)
-                return render(request, 'myapp/payment_gateway.html', {
-                    'form': form,
-                    'payment_session_id': session_id,
-                    'app_id': app_id,
-                    'secret_key': secret_key,
-                    'environment': environment,
-                })
+                if session_id:
+                    return render(request, 'myapp/order_form.html', {
+                        'form': form,
+                        'payment_session_id': session_id,
+                        'app_id': app_id,
+                        'secret_key': secret_key,
+                        'environment': environment,
+                    })
+                else:
+                    print("Payment session ID not found in the API response.")
             elif response.status_code == 400:
                 error_message = response.json().get('message')
                 print(f"API Error: {error_message}")
@@ -86,9 +87,6 @@ def initiate_payment(request):
         form = OrderForm()
 
     return render(request, 'myapp/order_form.html', {'form': form})
-
-def payment_gateway(request):
-    return render(request, 'myapp/payment_gateway.html')
 
 def payment_success(request):
     return render(request, 'myapp/payment_success.html')
